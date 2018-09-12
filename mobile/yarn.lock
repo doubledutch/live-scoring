@@ -16,9 +16,9 @@
     esutils "^2.0.2"
     js-tokens "^4.0.0"
 
-"@doubledutch/base-client@^3.4.0":
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/@doubledutch/base-client/-/base-client-3.4.0.tgz#75b241e90c2cef5e2eed79a78fdf69e77eaef4a9"
+"@doubledutch/base-client@3.5.0":
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/@doubledutch/base-client/-/base-client-3.5.0.tgz#e20d682468ceda6f906d6f524fde8d7c0647d152"
 
 "@doubledutch/firebase-connector@^3.3.1":
   version "3.5.2"
@@ -28,11 +28,11 @@
     firebase "^4.10.0"
     jest "^22.4.3"
 
-"@doubledutch/rn-client@^3.1.0":
-  version "3.5.0"
-  resolved "https://registry.yarnpkg.com/@doubledutch/rn-client/-/rn-client-3.5.0.tgz#8cbb43860ee5a88dec1301a554b119197c4e3da7"
+"@doubledutch/rn-client@^3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@doubledutch/rn-client/-/rn-client-3.5.1.tgz#a35b01d1563a88f4325367a3670f4390c5bd653e"
   dependencies:
-    "@doubledutch/base-client" "^3.4.0"
+    "@doubledutch/base-client" "3.5.0"
     react "16.0.0-alpha.12"
     react-native "0.46.4"
     react-native-fetch-blob "0.10.8"
@@ -3715,6 +3715,10 @@ lodash._reinterpolate@^3.0.0:
 lodash._root@^3.0.0:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/lodash._root/-/lodash._root-3.0.1.tgz#fba1c4524c19ee9a5f8136b4609f017cf4ded692"
+
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
 
 lodash.escape@^3.0.0:
   version "3.2.0"

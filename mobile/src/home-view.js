@@ -15,9 +15,8 @@
  */
 
 import React, { Component } from 'react'
-import ReactNative, {
-  KeyboardAvoidingView, Platform, TouchableOpacity, Text, TextInput, View, ScrollView
-} from 'react-native'
+import {Slider, StyleSheet, Text, View} from 'react-native'
+import debounce from 'lodash.debounce'
 
 // rn-client must be imported before FirebaseConnector
 import client, { Avatar, TitleBar } from '@doubledutch/rn-client'
@@ -26,11 +25,14 @@ const fbc = FirebaseConnector(client, 'livescoring')
 
 fbc.initializeAppWithSimpleBackend()
 
+const sessionId = 'default'
+
 export default class HomeView extends Component {
   constructor() {
     super()
 
-    this.state = { task: '', userPrivateTasks: [], sharedTasks: [] }
+    this.state = {}
+    client.getCurrentUser().then(currentUser => this.setState({currentUser}))
 
     this.signin = fbc.signin()
       .then(user => this.user = user)
@@ -38,136 +40,82 @@ export default class HomeView extends Component {
     this.signin.catch(err => console.error(err))
   }
 
+  userRef = () => fbc.database.public.userRef()
+
   componentDidMount() {
     this.signin.then(() => {
-      const userPrivateRef = fbc.database.private.userRef('tasks')
-      userPrivateRef.on('child_added', data => {
-        this.setState({ userPrivateTasks: [...this.state.userPrivateTasks, {...data.val(), key: data.key }] })
-      })
-      userPrivateRef.on('child_removed', data => {
-        this.setState({ userPrivateTasks: this.state.userPrivateTasks.filter(x => x.key !== data.key) })
-      })
-
-      const sharedRef = fbc.database.public.allRef('tasks')
-      sharedRef.on('child_added', data => {
-        this.setState({ sharedTasks: [...this.state.sharedTasks, {...data.val(), key: data.key }] })
-      })
-      sharedRef.on('child_removed', data => {
-        this.setState({ sharedTasks: this.state.sharedTasks.filter(x => x.key !== data.key) })
-      })
+      this.userRef().on('value', data => this.setState({user: data.val() || {}}))
     })
   }
 
   render() {
-    const { userPrivateTasks, sharedTasks } = this.state
-    const tasks = userPrivateTasks.map(t => ({...t, type:'private'})).concat(
-      sharedTasks.map(t => ({...t, type:'shared'}))
-    )
+    const {currentUser, user} = this.state
 
     return (
-      <KeyboardAvoidingView style={s.container} behavior={Platform.select({ios: "padding", android: null})}>
-        <TitleBar title="To do ✅" client={client} signin={this.signin} />
-        <ScrollView style={s.scroll}>
-          { tasks.map(task => (
-            <View key={task.key} style={s.task}>
-              <TouchableOpacity onPress={() => this.markComplete(task)}><Text style={s.checkmark}>✅  </Text></TouchableOpacity>
-              { renderCreator(task) }
-              <Text style={s.taskText}>{task.text}</Text>
+      <View style={s.container}>
+        <TitleBar title="Live Scoring" client={client} signin={this.signin} />
+        {currentUser && user
+          ? <View style={s.container}>
+              <View style={s.center}>
+                <Text style={s.title}>Score the contestant</Text>
+                <Slider style={s.slider}
+                  minimumValue={1}
+                  maximumValue={10}
+                  step={1}
+                  value={user.score || 0}
+                  onValueChange={this.onSlide}
+                />
+                <Text style={s.score}>{user.score || ' '}</Text>
+              </View>
+              <Avatar user={currentUser} client={client} size={100} />
             </View>
-          ))}
-        </ScrollView>
-        <View style={s.compose}>
-          <TextInput style={s.composeText} placeholder="Add task..."
-            value={this.state.task}
-            onChangeText={task => this.setState({task})} />
-          <View style={s.sendButtons}>
-            <TouchableOpacity style={s.sendButton} onPress={this.createPrivateTask}><Text style={s.sendButtonText}>+ private 🕵️️</Text></TouchableOpacity>
-            <TouchableOpacity style={s.sendButton} onPress={this.createSharedTask}><Text style={s.sendButtonText}>+ shared 📢</Text></TouchableOpacity>
-          </View>
-        </View>
-      </KeyboardAvoidingView>
+          : null
+        }
+      </View>
     )
   }
 
-  createPrivateTask = () => this.createTask(fbc.database.private.userRef)
-  createSharedTask = () => this.createTask(fbc.database.public.allRef)
-  
-  createTask(ref) {
-    if (this.user && this.state.task) {
-      ref('tasks').push({
-        text: this.state.task,
-        creator: client.currentUser
-      })
-      .then(() => this.setState({task: ''}))
-      .catch (x => console.error(x))
-    }    
-  }
-
-  markComplete(task) {
-    getRef(task).remove()
-
-    function getRef(task) {
-      switch(task.type) {
-        case 'private': return fbc.database.private.userRef('tasks').child(task.key)
-        case 'shared': return fbc.database.public.allRef('tasks').child(task.key)
-      }
+  onSlide = score => {
+    const {user} = this.state
+    if (score) {
+      this.setState({user: {...user, score}})
+      this.pushScore(score)
     }
   }
+
+  pushScore = debounce(score => {
+    const {currentUser} = this.state
+    if (currentUser) {
+      const {firstName, lastName, image} = currentUser
+      this.userRef().set({firstName, lastName, image, sessionId, score})
+    }
+  }, 250)
 }
 
-function renderCreator(task) {
-  if (task.type === 'private') return <Text style={s.creatorEmoji}>🕵️️</Text>
-  return <Avatar user={task.creator} size={22} style={s.creatorAvatar} />
-}
-
-const fontSize = 18
-const s = ReactNative.StyleSheet.create({
+const s = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#d9e1f9',
+    alignItems: 'center',
+    paddingBottom: 20,
+    width: '100%',
   },
-  scroll: {
+  center: {
     flex: 1,
-    padding: 15
-  },
-  task: {
-    flex: 1,
-    flexDirection: 'row',
-    marginBottom: 10
-  },
-  checkmark: {
-    textAlign: 'center',
-    fontSize
-  },
-  creatorAvatar: {
-    marginRight: 4
-  },
-  creatorEmoji: {
-    marginRight: 4,
-    fontSize
-  },
-  taskText: {
-    fontSize,
-    flex: 1
-  },
-  compose: {
-    height: 70,
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    padding: 10
-  },
-  sendButtons: {
     justifyContent: 'center',
+    width: '100%',
   },
-  sendButton: {
-    justifyContent: 'center',
-    margin: 5
-  },
-  sendButtonText: {
+  title: {
     fontSize: 20,
-    color: 'gray'
+    paddingVertical: 20,
+    textAlign: 'center'
   },
-  composeText: {
-    flex: 1
-  }
+  slider: {
+    marginHorizontal: 10,
+  },
+  score: {
+    fontSize: 40,
+    paddingVertical: 20,
+    textAlign: 'center',
+  },
 })
