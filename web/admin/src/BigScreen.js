@@ -17,24 +17,18 @@
 import React, {PureComponent} from 'react'
 import './BigScreen.css'
 
-import {Avatar} from '@doubledutch/react-components'
+import {mapPushedDataToStateObjects} from '@doubledutch/firebase-connector'
+// import {Avatar} from '@doubledutch/react-components'
 
 const numJoinedToShow = 7
 export default class BigScreen extends PureComponent {
-  state = {scorers: []}
+  state = {scorers: {}}
   componentDidMount() {
-    const {sessionId} = this.props
     this.backgroundUrlRef().on('value', data => this.setState({backgroundUrl: data.val()}))
     this.sessionRef().on('value', data => this.setState({session: data.val()}))
-    this.usersRef().on('child_added', data => {
-      const user = data.val()
-      if (user.sessionId === sessionId) {
-        this.setState(state => ({scorers: [...state.scorers, {...user, id: data.key}]}))
-      }
-    })
-    const removeScorer = data => this.setState(state => ({scorers: state.scorers.filter(u => u.id !== data.key)}))
-    this.usersRef().on('child_changed', data => data.val().sessionId !== sessionId && removeScorer(data))
-    this.usersRef().on('child_removed', removeScorer)
+
+    // {state: {scorers: {'id': {...user, score}}}}
+    mapPushedDataToStateObjects(this.usersRef(), this, 'scorers')
   }
 
   render() {
@@ -72,44 +66,13 @@ export default class BigScreen extends PureComponent {
     )
   }
 
-  // renderNotStarted() {
-  //   const {scorers} = this.state
-  //   if (scorers.length === 0) {
-  //     return (
-  //       <div className="box joined">
-  //         <div className="box-content">
-  //           <h1>Waiting</h1>
-  //           <h2>for players to join</h2>
-  //         </div>
-  //       </div>
-  //     )
-  //   }
-
-  //   return (
-  //     <div className="box joined">
-  //       <div className="box-content">
-  //         <h1>{joined.length}</h1>
-  //         <h2>{joined.length > 1 ? 'Have':'Has'} Joined</h2>
-  //         <div className="attendees-joined">
-  //           { joined.slice(Math.max(0,joined.length-numJoinedToShow)).map((u,i) => (
-  //             <div key={u.id}>
-  //               <Avatar user={u} size={7} units="vh" />
-  //               <span>{u.firstName} {u.lastName}</span>&nbsp;has joined
-  //             </div>
-  //           ))}
-  //         </div>
-  //       </div>
-  //     </div>
-  //   )
-  // }
-
   sessionRef = () => this.props.fbc.database.public.adminRef('sessions').child(this.props.sessionId)
   backgroundUrlRef = () => this.props.fbc.database.public.adminRef('backgroundUrl')
   usersRef = () => this.props.fbc.database.public.usersRef()
 
   getScoreStats = () => {
     // This assumes only integer, non-zero scores are possible
-    const scores = this.state.scorers.map(s => Math.floor(s.score || 0)).filter(x => x)
+    const scores = Object.values(this.state.scorers).map(s => Math.floor(s.score || 0)).filter(x => x)
     const average = (scores.length === 0)
       ? null
       : scores.reduce((sum, score) => sum + score, 0) / scores.length
