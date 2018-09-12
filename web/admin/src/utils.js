@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
- .App-intro {
-  font-size: large;
-  text-align: center;
+import qs from 'qs'
+
+export function parseQueryString() {
+  return qs.parse(document.location.search.substr(1))
 }
 
-.avatar {
-  width: 40px;
+export function openTab(url) {
+  window.open(url, '_blank')
 }

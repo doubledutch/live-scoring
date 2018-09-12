@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import React from 'react'
-import ReactDOM from 'react-dom'
-import App from './App'
-
-ReactDOM.render(<App />, document.getElementById('root'))  
+html, body {
+  margin: 0;
+  padding: 0;
+}
