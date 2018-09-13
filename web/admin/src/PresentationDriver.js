@@ -99,7 +99,7 @@ export default class PresentationDriver extends PureComponent {
   resetSession = () => {
     if (window.confirm('Are you sure you want to reset scores and prepare for the next contestant? This cannot be undone.')) {
       // Remove the session
-      this.publicSessionRef().remove()
+      this.publicSessionRef().set({state: 'NOT_STARTED'})
 
       // Remove users who were in the removed session.
       this.publicUsersRef().once('value', data => {

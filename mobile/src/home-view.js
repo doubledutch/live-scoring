@@ -32,7 +32,10 @@ export default class HomeView extends Component {
     super()
 
     this.state = {}
-    client.getCurrentUser().then(currentUser => this.setState({currentUser}))
+    client.getCurrentUser().then(currentUser => {
+      this.setState({currentUser})
+      client.getAttendee(currentUser.id).then(currentUser => this.setState({currentUser}))
+    })
 
     this.signin = fbc.signin()
       .then(user => this.user = user)
@@ -41,38 +44,51 @@ export default class HomeView extends Component {
   }
 
   userRef = () => fbc.database.public.userRef()
+  publicSessionRef = () => fbc.database.public.adminRef('sessions').child(sessionId)
 
   componentDidMount() {
     this.signin.then(() => {
       this.userRef().on('value', data => this.setState({user: data.val() || {}}))
+      this.publicSessionRef().on('value', data => this.setState({session: data.val()}))
     })
   }
 
   render() {
-    const {currentUser, user} = this.state
-
     return (
       <View style={s.container}>
         <TitleBar title="Live Scoring" client={client} signin={this.signin} />
-        {currentUser && user
-          ? <View style={s.container}>
-              <View style={s.center}>
-                <Text style={s.title}>Score the contestant</Text>
-                <Slider style={s.slider}
-                  minimumValue={1}
-                  maximumValue={10}
-                  step={1}
-                  value={user.score || 0}
-                  onValueChange={this.onSlide}
-                />
-                <Text style={s.score}>{user.score || ' '}</Text>
-              </View>
-              <Avatar user={currentUser} client={client} size={100} />
-            </View>
-          : null
-        }
+        {this.renderSession()}
       </View>
     )
+  }
+
+  renderSession() {
+    const {currentUser, user, session} = this.state
+    if (!currentUser || !user) return <View style={s.center}><Text style={s.title}>Loading...</Text></View>
+    switch ((session || {}).state) {
+      case 'SCORING_OPEN': return (
+        <View style={s.container}>
+          <View style={s.center}>
+            <Text style={s.title}>Select a score for {session.contestantName}.</Text>
+            <Slider style={s.slider}
+              minimumValue={1}
+              maximumValue={10}
+              step={1}
+              value={user.score || 0}
+              onValueChange={this.onSlide}
+            />
+            <Text style={s.score}>{user.score || ' '}</Text>
+          </View>
+          <Avatar user={currentUser} client={client} size={100} />
+        </View>
+      )
+      case 'SCORING_CLOSED': return (
+        <View style={s.center}><Text style={s.title}>Scoring is closed for {session.contestantName}.</Text></View>
+      )
+      default: return (
+        <View style={s.center}><Text style={s.title}>Please wait for live scoring to be enabled.</Text></View>
+      )
+    }
   }
 
   onSlide = score => {

@@ -61,7 +61,7 @@ export default class BigScreen extends PureComponent {
     return (
       <div>
         <div className="contestant-name">{session.contestantName}</div>
-        <div className="average-score">{score.average == null ? '' : score.average.toFixed(2)}</div>
+        {score.average == null ? <div className="average-score">&nbsp;</div> : <div className="average-score">{score.average.toFixed(2)}</div>}
       </div>
     )
   }
