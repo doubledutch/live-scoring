@@ -70,6 +70,7 @@ export default class HomeView extends Component {
         <View style={s.container}>
           <View style={s.center}>
             <Text style={s.title}>Select a score for {session.contestantName}.</Text>
+            <Text style={s.score}>{user.score || ' '}</Text>
             <Slider style={s.slider}
               minimumValue={1}
               maximumValue={10}
@@ -77,7 +78,6 @@ export default class HomeView extends Component {
               value={user.score || 0}
               onValueChange={this.onSlide}
             />
-            <Text style={s.score}>{user.score || ' '}</Text>
           </View>
           <Avatar user={currentUser} client={client} size={100} />
         </View>
@@ -127,7 +127,7 @@ const s = StyleSheet.create({
     textAlign: 'center'
   },
   slider: {
-    marginHorizontal: 10,
+    marginHorizontal: 50,
   },
   score: {
     fontSize: 40,

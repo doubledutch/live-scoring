@@ -29,6 +29,10 @@
   align-items: center;
 }
 
+.big-screen .score-count {
+  font-size: 1em;
+}
+
 .big-screen .contestant-name {
   color: #fff;
   font-size: 2em;
@@ -39,7 +43,7 @@
 
 .big-screen .average-score {
   color: #fff;
-  font-size: 2em;
+  font-size: 4em;
   padding: 0;
   margin: 0 0 0.2em 0;
   text-align: center;

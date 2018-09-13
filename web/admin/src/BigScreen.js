@@ -62,6 +62,7 @@ export default class BigScreen extends PureComponent {
       <div>
         <div className="contestant-name">{session.contestantName}</div>
         {score.average == null ? <div className="average-score">&nbsp;</div> : <div className="average-score">{score.average.toFixed(2)}</div>}
+        <div className="score-count">{scorersText(score.count)}</div>
       </div>
     )
   }
@@ -84,4 +85,10 @@ export default class BigScreen extends PureComponent {
 
     return {average, histogram, count: scores.length}
   }
+}
+
+function scorersText(count) {
+  if (count === 0) return 'Awaiting scores'
+  if (count === 1) return "from the first judge's score"
+  return `average from ${count} scores received`
 }
