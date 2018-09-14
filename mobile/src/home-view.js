@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import {Slider, StyleSheet, Text, View} from 'react-native'
 import debounce from 'lodash.debounce'
 
 // rn-client must be imported before FirebaseConnector
 import client, { Avatar, TitleBar } from '@doubledutch/rn-client'
-import FirebaseConnector from '@doubledutch/firebase-connector'
-const fbc = FirebaseConnector(client, 'livescoring')
-
-fbc.initializeAppWithSimpleBackend()
+import {provideFirebaseConnectorToReactComponent} from '@doubledutch/firebase-connector'
 
 const sessionId = 'default'
 
-export default class HomeView extends Component {
-  constructor() {
-    super()
+class HomeView extends PureComponent {
+  constructor(props) {
+    super(props)
 
     this.state = {}
     client.getCurrentUser().then(currentUser => {
@@ -37,14 +34,14 @@ export default class HomeView extends Component {
       client.getAttendee(currentUser.id).then(currentUser => this.setState({currentUser}))
     })
 
-    this.signin = fbc.signin()
+    this.signin = this.props.fbc.signin()
       .then(user => this.user = user)
 
     this.signin.catch(err => console.error(err))
   }
 
-  userRef = () => fbc.database.public.userRef()
-  publicSessionRef = () => fbc.database.public.adminRef('sessions').child(sessionId)
+  userRef = () => this.props.fbc.database.public.userRef()
+  publicSessionRef = () => this.props.fbc.database.public.adminRef('sessions').child(sessionId)
 
   componentDidMount() {
     this.signin.then(() => {
@@ -135,3 +132,5 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
 })
+
+export default provideFirebaseConnectorToReactComponent(client, 'livescoring', (props, fbc) => <HomeView {...props} fbc={fbc} />, PureComponent)
