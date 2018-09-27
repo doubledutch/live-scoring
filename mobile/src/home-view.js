@@ -76,7 +76,7 @@ class HomeView extends PureComponent {
               onValueChange={this.onSlide}
             />
           </View>
-          <Avatar user={currentUser} client={client} size={100} />
+          {/* <Avatar user={currentUser} client={client} size={100} /> */}
         </View>
       )
       case 'SCORING_CLOSED': return (
@@ -99,8 +99,10 @@ class HomeView extends PureComponent {
   pushScore = debounce(score => {
     const {currentUser} = this.state
     if (currentUser) {
-      const {firstName, lastName, image} = currentUser
-      this.userRef().set({firstName, lastName, image, sessionId, score})
+      let {firstName, lastName} = currentUser
+      firstName = firstName || ''
+      lastName = lastName || ''
+      this.userRef().set({firstName, lastName, sessionId, score})
     }
   }, 250)
 }
