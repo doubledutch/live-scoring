@@ -51,9 +51,10 @@ class HomeView extends PureComponent {
   }
 
   render() {
+    const { suggestedTitle } = this.props
     return (
       <View style={s.container}>
-        <TitleBar title="Live Scoring" client={client} signin={this.signin} />
+        <TitleBar title={suggestedTitle || 'Live Scoring'} client={client} signin={this.signin} />
         {this.renderSession()}
       </View>
     )
