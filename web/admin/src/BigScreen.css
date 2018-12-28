@@ -29,10 +29,6 @@
   align-items: center;
 }
 
-.big-screen .score-count {
-  font-size: 1em;
-}
-
 .big-screen .contestant-name {
   color: #fff;
   font-size: 2em;

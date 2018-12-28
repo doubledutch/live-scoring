@@ -49,6 +49,8 @@ export default class BigScreen extends PureComponent {
     switch (session.state) {
       case 'NOT_STARTED':
         return this.renderNotStarted()
+      case 'INTRO_CONTESTANT':
+        return this.renderIntro(session)
       case 'SCORING_OPEN':
         return this.renderScoring(session, true)
       case 'SCORING_CLOSED':
@@ -79,10 +81,15 @@ export default class BigScreen extends PureComponent {
         ) : (
           <div className="average-score">{score.average.toFixed(2)}</div>
         )}
-        <div className="score-count">{scorersText(score.count)}</div>
       </div>
     )
   }
+
+  renderIntro = session => (
+    <div>
+      <div className="contestant-name">{session.contestantName}</div>
+    </div>
+  )
 
   sessionRef = () => this.props.fbc.database.public.adminRef('sessions').child(this.props.sessionId)
 
@@ -108,10 +115,4 @@ export default class BigScreen extends PureComponent {
 
     return { average, histogram, count: scores.length }
   }
-}
-
-function scorersText(count) {
-  if (count === 0) return 'Awaiting scores'
-  if (count === 1) return "from the first judge's score"
-  return `average from ${count} scores received`
 }
