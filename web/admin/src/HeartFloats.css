@@ -21,14 +21,16 @@
 
 .heart-enter {
   top: 100vh;
+  opacity: 0.01;
+}
+
+.heart-enter-active {
+  top: -10vh;
+  opacity: 1;
+  transition: top 2000ms ease-in, opacity 1500ms ease-in;
 }
 
 .heart-enter-done {
   top: -10vh;
   visibility: hidden;
-}
-
-.heart-enter-active {
-  top: -10vh;
-  transition: all 4000ms ease-in;
 }
