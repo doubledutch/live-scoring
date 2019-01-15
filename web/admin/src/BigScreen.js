@@ -84,11 +84,12 @@ export default class BigScreen extends PureComponent {
 
   renderScore = session => {
     const score = this.getScoreStats()
+    const totalHearts = (score.average || 0) * (score.count || 0)
     return (
       <div>
         <div className="contestant-name">{session.contestantName}</div>
         <div className="average-score">
-          {score.average || 0 * score.count}{' '}
+          {totalHearts}{' '}
           <span role="img" aria-label="heart">
             ❤️
           </span>
