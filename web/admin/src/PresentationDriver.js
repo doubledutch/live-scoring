@@ -43,6 +43,7 @@ export default class PresentationDriver extends PureComponent {
 
   componentWillUnmount() {
     this.unwireHandlers()
+    this.killTimer()
   }
 
   wireHandlers(props) {
@@ -53,7 +54,6 @@ export default class PresentationDriver extends PureComponent {
 
   unwireHandlers() {
     this.publicSessionRef().off('value', this.publicSessionHandler)
-    this.clearTimer()
   }
 
   render() {
@@ -62,7 +62,7 @@ export default class PresentationDriver extends PureComponent {
     if (!session || !publicSession)
       return (
         <div className="presentation-driver">
-          <button className="dd-bordered" onClick={this.initializeSession}>
+          <button className="dd-bordered" onClick={this.initializeSession} type="button">
             Initialize
           </button>
         </div>
@@ -156,7 +156,7 @@ export default class PresentationDriver extends PureComponent {
   }
 
   renderReset = () => (
-    <button className="dd-bordered destructive" onClick={this.resetSession}>
+    <button className="dd-bordered destructive" onClick={this.resetSession} type="button">
       Reset scoring session
     </button>
   )
@@ -168,6 +168,7 @@ export default class PresentationDriver extends PureComponent {
       )
     ) {
       // Remove the session
+      this.killTimer()
       this.publicSessionRef().set({ state: 'NOT_STARTED' })
 
       // Remove users who were in the removed session.
@@ -196,7 +197,14 @@ export default class PresentationDriver extends PureComponent {
       seconds: session.seconds || defaultSeconds,
     })
 
-    setTimeout(this.closeScoring, session.seconds * 1000)
+    this.timer = setTimeout(this.closeScoring, session.seconds * 1000)
+  }
+
+  killTimer() {
+    if (this.timer) {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
   }
 
   introContestant = () =>
@@ -205,5 +213,8 @@ export default class PresentationDriver extends PureComponent {
       contestantName: this.props.session.contestantName,
     })
 
-  closeScoring = () => this.publicSessionRef().update({ state: 'SCORING_CLOSED' })
+  closeScoring = () => {
+    this.killTimer()
+    this.publicSessionRef().update({ state: 'SCORING_CLOSED' })
+  }
 }
