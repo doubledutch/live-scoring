@@ -193,7 +193,7 @@ export default class PresentationDriver extends PureComponent {
     this.publicSessionRef().set({
       state: 'SCORING_OPEN',
       contestantName: session.contestantName,
-      seconds: session.seconds,
+      seconds: session.seconds || defaultSeconds,
     })
 
     setTimeout(this.closeScoring, session.seconds * 1000)
