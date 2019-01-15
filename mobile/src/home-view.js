@@ -75,7 +75,7 @@ class HomeView extends PureComponent {
         if (remainingHearts <= 0) return (
           <View style={s.container}>
             <View style={s.center}>
-              <Text style={s.title}>Such affirmation! You've sent {session.contestantName} all the ❤️s you could!</Text>
+              <Text style={s.title}>Such affirmation! You&apos;ve sent {session.contestantName} all the ❤️s you could!</Text>
             </View>
           </View>
         )
@@ -83,7 +83,7 @@ class HomeView extends PureComponent {
           <View style={s.container}>
             <Text style={s.title}>
               Send up to {remainingHearts} more 
-              ❤️{remainingHearts > 1 ? 's' : ''} for {session.contestantName}.
+              ❤️{remainingHearts > 1 ? 's' : ''} for {session.contestantName}. Whoever earns the most hearts will be the winner.
             </Text>
             <View style={s.center}>
               <Text style={s.title}>Tap to send</Text>
