@@ -189,11 +189,14 @@ export default class PresentationDriver extends PureComponent {
   }
 
   openScoring = () => {
+    const { session } = this.props
     this.publicSessionRef().set({
       state: 'SCORING_OPEN',
-      contestantName: this.props.session.contestantName,
-      seconds: this.props.session.seconds,
+      contestantName: session.contestantName,
+      seconds: session.seconds,
     })
+
+    setTimeout(this.closeScoring, session.seconds * 1000)
   }
 
   introContestant = () =>
