@@ -84,6 +84,7 @@ export default class Admin extends PureComponent {
                   session={session}
                   users={users}
                   updateSessionContestantName={this.updateSessionContestantName}
+                  updateSessionSeconds={this.updateSessionSeconds}
                 />
                 <div className="presentation-overlays">
                   <div>Controls</div>
@@ -113,6 +114,12 @@ export default class Admin extends PureComponent {
       this.publicSessionRef()
         .child(sessionId)
         .update({ contestantName })
+  }
+
+  updateSessionSeconds = seconds => {
+    this.sessionsRef()
+      .child(sessionId)
+      .update({ seconds })
   }
 
   onBackgroundUrlChange = e => this.backgroundUrlRef().set(e.target.value)

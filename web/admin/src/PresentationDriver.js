@@ -18,6 +18,8 @@ import React, { PureComponent } from 'react'
 import { TextInput } from '@doubledutch/react-components'
 import './PresentationDriver.css'
 
+const defaultSeconds = 300
+
 export default class PresentationDriver extends PureComponent {
   publicSessionRef = props =>
     (props || this.props).fbc.database.public
@@ -69,6 +71,8 @@ export default class PresentationDriver extends PureComponent {
     switch (publicSession.state) {
       case 'NOT_STARTED':
         return this.renderNotStarted(session)
+      case 'INTRO_CONTESTANT':
+        return this.renderIntroed(session)
       case 'SCORING_OPEN':
         return this.renderScoringOpen()
       case 'SCORING_CLOSED':
@@ -88,8 +92,34 @@ export default class PresentationDriver extends PureComponent {
           value={contestantName}
           onChange={this.updateContestantName}
         />
-        <button className="dd-bordered" onClick={this.openScoring}>
-          {contestantName ? `Open scoring for ${contestantName}` : 'Open scoring'}
+        <button className="dd-bordered" onClick={this.introContestant} type="button">
+          {contestantName ? `Intro ${contestantName}` : 'Intro contestant'}
+        </button>
+        {this.renderReset()}
+      </div>
+    )
+  }
+
+  renderIntroed(session) {
+    const contestantName = session.contestantName || ''
+    const seconds = session.seconds || 300
+    return (
+      <div className="presentation-driver vertical space-children">
+        <TextInput
+          label="Contestant"
+          placeholder="Enter name here"
+          value={contestantName}
+          onChange={this.updateContestantName}
+        />
+        <TextInput
+          label="Seconds"
+          placeholder="300"
+          type="number"
+          value={seconds}
+          onChange={this.updateSeconds}
+        />
+        <button className="dd-bordered" onClick={this.openScoring} type="button">
+          {contestantName ? `Start time for ${contestantName}` : 'Start time'}
         </button>
         {this.renderReset()}
       </div>
@@ -98,10 +128,12 @@ export default class PresentationDriver extends PureComponent {
 
   updateContestantName = e => this.props.updateSessionContestantName(e.target.value)
 
+  updateSeconds = e => this.props.updateSessionSeconds(+e.target.value || defaultSeconds)
+
   renderScoringOpen() {
     return (
       <div className="presentation-driver vertical space-children">
-        <button className="dd-bordered" onClick={this.closeScoring}>
+        <button className="dd-bordered" onClick={this.closeScoring} type="button">
           Close scoring
         </button>
         {this.renderReset()}
@@ -156,9 +188,20 @@ export default class PresentationDriver extends PureComponent {
     this.publicSessionRef().set({ state: 'NOT_STARTED' })
   }
 
-  openScoring = () =>
+  openScoring = () => {
+    const { session } = this.props
     this.publicSessionRef().set({
       state: 'SCORING_OPEN',
+      contestantName: session.contestantName,
+      seconds: session.seconds || defaultSeconds,
+    })
+
+    setTimeout(this.closeScoring, session.seconds * 1000)
+  }
+
+  introContestant = () =>
+    this.publicSessionRef().set({
+      state: 'INTRO_CONTESTANT',
       contestantName: this.props.session.contestantName,
     })
 

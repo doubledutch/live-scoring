@@ -15,7 +15,7 @@
  */
 
 import React, { PureComponent } from 'react'
-import { Slider, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import debounce from 'lodash.debounce'
 
 // rn-client must be imported before FirebaseConnector
@@ -23,6 +23,7 @@ import client, { Avatar, TitleBar } from '@doubledutch/rn-client'
 import { provideFirebaseConnectorToReactComponent } from '@doubledutch/firebase-connector'
 
 const sessionId = 'default'
+const maxHearts = 20
 
 class HomeView extends PureComponent {
   constructor(props) {
@@ -70,19 +71,25 @@ class HomeView extends PureComponent {
       )
     switch ((session || {}).state) {
       case 'SCORING_OPEN':
-        return (
+        const remainingHearts = maxHearts - (user.score || 0)
+        if (remainingHearts <= 0) return (
           <View style={s.container}>
             <View style={s.center}>
-              <Text style={s.title}>Select a score for {session.contestantName}.</Text>
-              <Text style={s.score}>{user.score || ' '}</Text>
-              <Slider
-                style={s.slider}
-                minimumValue={1}
-                maximumValue={10}
-                step={1}
-                value={user.score || 0}
-                onValueChange={this.onSlide}
-              />
+              <Text style={s.title}>Such affirmation! You&apos;ve sent {session.contestantName} all the ❤️s you could!</Text>
+            </View>
+          </View>
+        )
+        return (
+          <View style={s.container}>
+            <Text style={s.title}>
+              Send up to {remainingHearts} more 
+              ❤️{remainingHearts > 1 ? 's' : ''} for {session.contestantName}. Whoever earns the most hearts will be the winner.
+            </Text>
+            <View style={s.center}>
+              <Text style={s.title}>Tap to send</Text>
+              <TouchableOpacity onPress={this.sendHeart}>
+                <BigHeart />
+              </TouchableOpacity>
             </View>
             {/* <Avatar user={currentUser} client={client} size={100} /> */}
           </View>
@@ -102,9 +109,10 @@ class HomeView extends PureComponent {
     }
   }
 
-  onSlide = score => {
+  sendHeart = () => {
     const { user } = this.state
-    if (score) {
+    const score = (user.score || 0) + 1
+    if (score <= maxHearts) {
       this.setState({ user: { ...user, score } })
       this.pushScore(score)
     }
@@ -137,16 +145,13 @@ const s = StyleSheet.create({
   title: {
     fontSize: 20,
     paddingVertical: 20,
+    paddingHorizontal: 10,
     textAlign: 'center',
   },
-  slider: {
-    marginHorizontal: 50,
-  },
-  score: {
-    fontSize: 40,
-    paddingVertical: 20,
+  bigHeartText: {
+    fontSize: 150,
     textAlign: 'center',
-  },
+  }
 })
 
 export default provideFirebaseConnectorToReactComponent(
@@ -154,4 +159,10 @@ export default provideFirebaseConnectorToReactComponent(
   'livescoring',
   (props, fbc) => <HomeView {...props} fbc={fbc} />,
   PureComponent,
+)
+
+const BigHeart = () => (
+  <View>
+    <Text style={s.bigHeartText}>❤️</Text>
+  </View>
 )

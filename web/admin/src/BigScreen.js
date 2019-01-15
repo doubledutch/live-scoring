@@ -18,9 +18,9 @@ import React, { PureComponent } from 'react'
 import './BigScreen.css'
 
 import { mapPushedDataToStateObjects } from '@doubledutch/firebase-connector'
-// import {Avatar} from '@doubledutch/react-components'
+import HeartFloats from './HeartFloats'
+import Timer from './Timer'
 
-const numJoinedToShow = 7
 export default class BigScreen extends PureComponent {
   state = { scorers: {} }
 
@@ -49,10 +49,12 @@ export default class BigScreen extends PureComponent {
     switch (session.state) {
       case 'NOT_STARTED':
         return this.renderNotStarted()
+      case 'INTRO_CONTESTANT':
+        return this.renderIntro(session)
       case 'SCORING_OPEN':
-        return this.renderScoring(session, true)
+        return this.renderScoring(session)
       case 'SCORING_CLOSED':
-        return this.renderScoring(session, false)
+        return this.renderScore(session)
       default:
         return null
     }
@@ -60,7 +62,7 @@ export default class BigScreen extends PureComponent {
 
   renderNotStarted = () => {
     // Blank screen, or photo credit if using default photo.
-    if (!this.state.backgroundUrl) return null
+    if (this.state.backgroundUrl) return null
     return (
       <div className="photo-credit">
         Photo by <a href="https://unsplash.com/photos/Knwea-mLGAg">Felix Mittermeier</a> on{' '}
@@ -69,20 +71,37 @@ export default class BigScreen extends PureComponent {
     )
   }
 
-  renderScoring = (session, isOpen) => {
+  renderScoring = session => {
     const score = this.getScoreStats()
     return (
       <div>
         <div className="contestant-name">{session.contestantName}</div>
-        {score.average == null ? (
-          <div className="average-score">&nbsp;</div>
-        ) : (
-          <div className="average-score">{score.average.toFixed(2)}</div>
-        )}
-        <div className="score-count">{scorersText(score.count)}</div>
+        <Timer totalSeconds={session.seconds} className="average-score" />
+        <HeartFloats heartCount={score.average * score.count} />
       </div>
     )
   }
+
+  renderScore = session => {
+    const score = this.getScoreStats()
+    return (
+      <div>
+        <div className="contestant-name">{session.contestantName}</div>
+        <div className="average-score">
+          {score.average || 0 * score.count}{' '}
+          <span role="img" aria-label="heart">
+            ❤️
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  renderIntro = session => (
+    <div>
+      <div className="contestant-name">{session.contestantName}</div>
+    </div>
+  )
 
   sessionRef = () => this.props.fbc.database.public.adminRef('sessions').child(this.props.sessionId)
 
@@ -108,10 +127,4 @@ export default class BigScreen extends PureComponent {
 
     return { average, histogram, count: scores.length }
   }
-}
-
-function scorersText(count) {
-  if (count === 0) return 'Awaiting scores'
-  if (count === 1) return "from the first judge's score"
-  return `average from ${count} scores received`
 }
