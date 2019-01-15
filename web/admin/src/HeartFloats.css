@@ -22,12 +22,14 @@
 .heart-enter {
   top: 100vh;
   opacity: 0.01;
+  transform: translateX(0);
 }
 
 .heart-enter-active {
   top: -10vh;
+  transform: translateX(10vw);
   opacity: 1;
-  transition: top 2000ms ease-in, opacity 1500ms ease-in;
+  transition: top 2000ms ease-in, transform 2000ms cubic-bezier(.5,2,.5,-1), opacity 1500ms ease-in;
 }
 
 .heart-enter-done {
