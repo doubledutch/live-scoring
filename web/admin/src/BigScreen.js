@@ -88,7 +88,7 @@ export default class BigScreen extends PureComponent {
       <div>
         <div className="contestant-name">{session.contestantName}</div>
         <div className="average-score">
-          {score.average || 0}{' '}
+          {score.average || 0 * score.count}{' '}
           <span role="img" aria-label="heart">
             ❤️
           </span>
