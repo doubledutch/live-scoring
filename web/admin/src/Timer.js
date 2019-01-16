@@ -31,7 +31,14 @@ export default class Timer extends PureComponent {
   }
 
   componentWillUnmount() {
-    if (this.timer) clearInterval(this.timer)
+    this.killTimer()
+  }
+
+  killTimer() {
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null
+    }
   }
 
   init() {
@@ -41,13 +48,15 @@ export default class Timer extends PureComponent {
       this.startTime = new Date().valueOf()
       if (this.timer) clearInterval(this.timer)
       this.setState({ seconds: totalSeconds - 1 })
-      this.timer = setInterval(
-        () =>
-          this.setState({
-            seconds: Math.floor(totalSeconds - (new Date().valueOf() - this.startTime) / 1000),
-          }),
-        250,
-      )
+      this.timer = setInterval(() => {
+        const seconds = Math.max(
+          0,
+          Math.floor(totalSeconds - (new Date().valueOf() - this.startTime) / 1000),
+        )
+        if (seconds === 0) this.killTimer()
+
+        this.setState({ seconds })
+      }, 250)
     }
   }
 
