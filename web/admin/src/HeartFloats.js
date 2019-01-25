@@ -21,14 +21,14 @@ import './HeartFloats.css'
 
 const randomishX = i => `${((i * 10) ** 71 % 78) + 10}vw`
 
-const HeartFloats = ({ heartCount }) => {
+const HeartFloats = ({ heartCount, emoji }) => {
   const hearts = []
 
   for (let i = 0; i < heartCount; ++i) {
     hearts.push(
       <CSSTransition classNames="heart" in unmountOnExit timeout={5000} key={`heart-${i}`}>
         <span role="img" aria-label="heart" className="heart" style={{ left: randomishX(i) }}>
-          ❤️
+          {emoji}
         </span>
       </CSSTransition>,
     )

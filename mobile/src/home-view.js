@@ -24,6 +24,7 @@ import { provideFirebaseConnectorToReactComponent } from '@doubledutch/firebase-
 
 const sessionId = 'default'
 const maxHearts = 20
+const defaultEmoji = '❤️'
 
 class HomeView extends PureComponent {
   constructor(props) {
@@ -44,10 +45,13 @@ class HomeView extends PureComponent {
 
   publicSessionRef = () => this.props.fbc.database.public.adminRef('sessions').child(sessionId)
 
+  emojiRef = () => this.props.fbc.database.public.adminRef('emoji')
+
   componentDidMount() {
     this.signin.then(() => {
       this.userRef().on('value', data => this.setState({ user: data.val() || {} }))
       this.publicSessionRef().on('value', data => this.setState({ session: data.val() }))
+      this.emojiRef().on('value', data => this.setState({ emoji: data.val() || defaultEmoji }))
     })
   }
 
@@ -62,7 +66,7 @@ class HomeView extends PureComponent {
   }
 
   renderSession() {
-    const { currentUser, user, session } = this.state
+    const { currentUser, emoji, user, session } = this.state
     if (!currentUser || !user)
       return (
         <View style={s.center}>
@@ -72,23 +76,29 @@ class HomeView extends PureComponent {
     switch ((session || {}).state) {
       case 'SCORING_OPEN':
         const remainingHearts = maxHearts - (user.score || 0)
-        if (remainingHearts <= 0) return (
-          <View style={s.container}>
-            <View style={s.center}>
-              <Text style={s.title}>Such affirmation! You&apos;ve sent {session.contestantName} all the ❤️s you could!</Text>
+        if (remainingHearts <= 0)
+          return (
+            <View style={s.container}>
+              <View style={s.center}>
+                <Text style={s.title}>
+                  Such affirmation! You&apos;ve sent {session.contestantName} all the {emoji}s you
+                  could!
+                </Text>
+              </View>
             </View>
-          </View>
-        )
+          )
         return (
           <View style={s.container}>
             <Text style={s.title}>
-              Send up to {remainingHearts} more 
-              ❤️{remainingHearts > 1 ? 's' : ''} for {session.contestantName}. Whoever earns the most hearts will be the winner.
+              Send up to {remainingHearts} more
+              {emoji}
+              {remainingHearts > 1 ? 's' : ''} for {session.contestantName}. Whoever earns the most
+              hearts will be the winner.
             </Text>
             <View style={s.center}>
               <Text style={s.title}>Tap to send</Text>
               <TouchableOpacity onPress={this.sendHeart}>
-                <BigHeart />
+                <BigHeart emoji={emoji} />
               </TouchableOpacity>
             </View>
             {/* <Avatar user={currentUser} client={client} size={100} /> */}
@@ -151,7 +161,7 @@ const s = StyleSheet.create({
   bigHeartText: {
     fontSize: 150,
     textAlign: 'center',
-  }
+  },
 })
 
 export default provideFirebaseConnectorToReactComponent(
@@ -161,8 +171,8 @@ export default provideFirebaseConnectorToReactComponent(
   PureComponent,
 )
 
-const BigHeart = () => (
+const BigHeart = ({ emoji }) => (
   <View>
-    <Text style={s.bigHeartText}>❤️</Text>
+    <Text style={s.bigHeartText}>{emoji}</Text>
   </View>
 )

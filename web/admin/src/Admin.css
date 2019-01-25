@@ -54,8 +54,16 @@ html, body, input, button, select, form{
   flex-wrap: wrap;
 }
 
+.emoji {
+  width: 200px;
+  text-align: center;
+  margin-top: 10px;
+  margin-right: 10px;
+  box-sizing: border-box;
+}
+
 .background-url {
-  width: 800px;
+  width: 590px;
   margin-top: 10px;
   box-sizing: border-box;
 }

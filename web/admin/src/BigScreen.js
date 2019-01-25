@@ -21,11 +21,14 @@ import { mapPushedDataToStateObjects } from '@doubledutch/firebase-connector'
 import HeartFloats from './HeartFloats'
 import Timer from './Timer'
 
+const defaultEmoji = '❤️'
+
 export default class BigScreen extends PureComponent {
-  state = { scorers: {} }
+  state = { scorers: {}, emoji: defaultEmoji }
 
   componentDidMount() {
     this.backgroundUrlRef().on('value', data => this.setState({ backgroundUrl: data.val() }))
+    this.emojiRef().on('value', data => this.setState({ emoji: data.val() || defaultEmoji }))
     this.sessionRef().on('value', data => this.setState({ session: data.val() }))
 
     // {state: {scorers: {'id': {...user, score}}}}
@@ -77,12 +80,13 @@ export default class BigScreen extends PureComponent {
       <div>
         <div className="contestant-name">{session.contestantName}</div>
         <Timer totalSeconds={session.seconds} className="average-score" />
-        <HeartFloats heartCount={score.average * score.count} />
+        <HeartFloats heartCount={score.average * score.count} emoji={this.state.emoji} />
       </div>
     )
   }
 
   renderScore = session => {
+    const { emoji } = this.state
     const score = this.getScoreStats()
     const totalHearts = (score.average || 0) * (score.count || 0)
     return (
@@ -91,7 +95,7 @@ export default class BigScreen extends PureComponent {
         <div className="average-score">
           {totalHearts}{' '}
           <span role="img" aria-label="heart">
-            ❤️
+            {emoji}
           </span>
         </div>
       </div>
@@ -107,6 +111,8 @@ export default class BigScreen extends PureComponent {
   sessionRef = () => this.props.fbc.database.public.adminRef('sessions').child(this.props.sessionId)
 
   backgroundUrlRef = () => this.props.fbc.database.public.adminRef('backgroundUrl')
+
+  emojiRef = () => this.props.fbc.database.public.adminRef('emoji')
 
   usersRef = () => this.props.fbc.database.public.usersRef()
 

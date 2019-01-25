@@ -35,6 +35,8 @@ export default class Admin extends PureComponent {
 
   backgroundUrlRef = () => this.props.fbc.database.public.adminRef('backgroundUrl')
 
+  emojiUrlRef = () => this.props.fbc.database.public.adminRef('emoji')
+
   publicUsersRef = () => this.props.fbc.database.public.usersRef()
 
   publicSessionRef = () => this.props.fbc.database.public.adminRef('sessions')
@@ -45,11 +47,12 @@ export default class Admin extends PureComponent {
     mapPushedDataToStateObjects(this.publicUsersRef(), this, 'users')
     mapPushedDataToStateObjects(this.publicSessionRef(), this, 'publicSessions')
     this.backgroundUrlRef().on('value', data => this.setState({ backgroundUrl: data.val() || '' }))
+    this.emojiUrlRef().on('value', data => this.setState({ emoji: data.val() || '' }))
     fbc.getLongLivedAdminToken().then(longLivedToken => this.setState({ longLivedToken }))
   }
 
   render() {
-    const { backgroundUrl, launchDisabled, sessions, users } = this.state
+    const { backgroundUrl, emoji, launchDisabled, sessions, users } = this.state
 
     const session = sessions[sessionId] || { id: sessionId }
 
@@ -96,6 +99,14 @@ export default class Admin extends PureComponent {
         <div>
           <input
             type="text"
+            maxLength={4}
+            value={emoji}
+            placeholder="Custom emoji"
+            onChange={this.onEmojiChange}
+            className="dd-bordered emoji"
+          />
+          <input
+            type="text"
             value={backgroundUrl}
             onChange={this.onBackgroundUrlChange}
             placeholder="Custom background image URL. Suggested at least 700px high and wide."
@@ -123,6 +134,8 @@ export default class Admin extends PureComponent {
   }
 
   onBackgroundUrlChange = e => this.backgroundUrlRef().set(e.target.value)
+
+  onEmojiChange = e => this.emojiUrlRef().set(e.target.value)
 
   createSession = () =>
     this.sessionsRef()
