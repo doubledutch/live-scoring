@@ -80,7 +80,10 @@ export default class BigScreen extends PureComponent {
       <div>
         <div className="contestant-name">{session.contestantName}</div>
         <Timer totalSeconds={session.seconds} className="average-score" />
-        <HeartFloats heartCount={score.average * score.count} emoji={this.state.emoji} />
+        <HeartFloats
+          heartCount={Math.round(score.average * score.count)}
+          emoji={this.state.emoji}
+        />
       </div>
     )
   }
@@ -88,7 +91,7 @@ export default class BigScreen extends PureComponent {
   renderScore = session => {
     const { emoji } = this.state
     const score = this.getScoreStats()
-    const totalHearts = (score.average || 0) * (score.count || 0)
+    const totalHearts = Math.round((score.average || 0) * (score.count || 0))
     return (
       <div>
         <div className="contestant-name">{session.contestantName}</div>
