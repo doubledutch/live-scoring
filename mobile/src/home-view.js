@@ -93,7 +93,7 @@ class HomeView extends PureComponent {
               Send up to {remainingHearts} more
               {emoji}
               {remainingHearts > 1 ? 's' : ''} for {session.contestantName}. Whoever earns the most
-              hearts will be the winner.
+              {emoji}s will be the winner.
             </Text>
             <View style={s.center}>
               <Text style={s.title}>Tap to send</Text>
